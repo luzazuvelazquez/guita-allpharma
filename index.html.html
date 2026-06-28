@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>GUITA</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/styles.css">
+</head>
+	<body>
+
+		<div id="toast" class="toast-bar"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="s-login" class="screen active">
+<div class="login-wrap">
+<div class="login-bg"></div>
+<div class="login-bg-overlay"></div>
+<div class="login-card">
+ <div class="login-logo">
+  <img src="img/logo.png" alt="GUITA" class="login-logo-clean">
+  <h1 style="font-size:20px; font-weight:700; color:#0F3580; letter-spacing:0.5px; margin-top:16px;">G.U.I.T.A.</h1>
+  <p style="font-size:11px; color:#5F6B7A; margin-top:4px;">Gestión Unificada Integral de Tickets de All Pharma</p>
+</div>
+  <div class="form-group">
+    <label>Correo electrónico</label>
+    <input type="text" id="l-email" placeholder="nombre@allpharma.com" autocomplete="username" autofocus onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <div class="form-group">
+    <label>Contraseña</label>
+ <div class="pass-wrap">
+  <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+  <button type="button" class="btn-eye" onclick="togglePass()" id="btn-eye" title="Mostrar/ocultar contraseña">
+    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
+</div>
+<p class="hint">Autenticación segura vía LDAP corporativo</p>
+  </div>
+  <div id="l-err" style="display:none;font-size:12px;color:#DC3545;margin-bottom:10px">Completá todos los campos.</div>
+  <button id="btn-ingresar" class="btn-prim" style="width:100%;padding:10px" onclick="doLogin()">Ingresar</button>
+</div>
+</div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="s-main" class="screen">
+<div class="topbar">
+  <div class="logo-area">
+    <div class="topbar-logo-wrap">
+      <img src="img/logo-area.png" alt="All Pharma" class="topbar-logo-img">
+    </div>
+    <div class="topbar-divider"></div>
+    <div>
+      <div class="logo-text">G.U.I.T.A.</div>
+      <div class="logo-sub" id="top-sub">Sistema de soporte IT</div>
+    </div>
+  </div>
+  <div class="topnav-right">
+      <div class="notif-wrap" id="notif-wrap" style="display:none">
+        <button class="btn-notif" id="btn-notif" onclick="toggleNotifDropdown(event)" title="Notificaciones">
+          🔔 Notificaciones
+          <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+        </button>
+        <div class="notif-dropdown" id="notif-dropdown">
+          <div class="notif-dropdown-header">
+            <span class="notif-dropdown-title">🔔 Mis notificaciones</span>
+            <button class="notif-marcar-btn" onclick="marcarTodasLeidasNotif()">Marcar todas como leídas</button>
+          </div>
+          <div class="notif-dropdown-list" id="notif-dropdown-list"></div>
+        </div>
+      </div>
+      <div class="topbar-sep"></div>
+    	<span class="role-pill" id="top-role-pill"></span>
+    	<div class="top-avatar" id="top-av"></div>
+    	<span class="topbar-username" id="top-name"></span>
+      <div class="topbar-sep"></div>
+    	<button class="btn-darkmode" id="btn-darkmode" onclick="toggleDarkMode()" title="Cambiar tema">☀️</button>
+    	<button class="btn-logout" onclick="goto('login')">Salir</button>
+  </div>
+</div>
+	<div class="layout">
+  		<div class="sidebar" id="sidebar"></div>
+  		<div class="main" id="main-content"></div>
+	</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+	<script src="js/app.js"></script>
+	<!-- ===== MODAL CALIFICACIÓN ===== -->
+<div id="modal-rating" class="modal-overlay">
+  <div class="modal-card">
+    <div style="font-size:28px;margin-bottom:8px">⭐</div>
+    <p class="modal-title">¿Cómo calificarías la atención?</p>
+    <p class="modal-sub">Tu opinión nos ayuda a mejorar el servicio de soporte IT</p>
+    <div class="stars-row" id="stars-row"></div>
+    <textarea id="rating-comment" placeholder="Comentario opcional sobre la atención recibida..." style="display:block;width:100%;margin-top:18px;border:1px solid #C0CEDF;border-radius:8px;padding:9px 12px;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:80px;color:#1A2440;line-height:1.5;text-align:left;box-sizing:border-box" onfocus="this.style.borderColor='#1A4FAD';this.style.boxShadow='0 0 0 2px rgba(26,79,173,0.12)'" onblur="this.style.borderColor='#C0CEDF';this.style.boxShadow='none'"></textarea>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+      <button class="btn-prim" id="btn-submit-rating" disabled onclick="submitRating()">Enviar calificación</button>
+    </div>
+  </div>
+</div>
+	
+<!-- ===== MODAL EDITAR TICKET ===== -->
+<div id="modal-editar-ticket" class="modal-overlay">
+  <div class="modal-card" style="width:480px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <p style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">Editar ticket <span id="et-ticket-id" style="color:#1A4FAD"></span></p>
+        <p style="font-size:12px;color:#5F6B7A" id="et-subtitle">Modificá los datos del ticket</p>
+      </div>
+      <button onclick="closeModalEditarTicket()" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div class="form-group">
+      <label>Título <span class="req">*</span></label>
+      <input type="text" id="et-titulo">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría <span class="req">*</span></label>
+        <select id="et-cat">
+          <option value="">Seleccioná...</option>
+          <option>Hardware</option>
+          <option>Software</option>
+          <option>Redes / Conectividad</option>
+          <option>Accesos y permisos</option>
+          <option>Impresoras / Periféricos</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="et-prio">
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" id="et-row-gestion">
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="et-estado" onchange="onEtEstadoChange()">
+          <option value="abierto">Abierto</option>
+          <option value="progreso">En progreso</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="derivado">Derivado</option>
+          <option value="resuelto">Resuelto</option>
+          <option value="cerrado">Cerrado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Descripción <span class="req">*</span></label>
+      <!-- Envolvemos el textarea con nuestra nueva clase CSS -->
+      <div class="modal-ticket-desc">
+        <textarea id="et-desc" style="min-height:90px; width:100%; border:none; background:transparent; outline:none; color:inherit; font-family:inherit;"></textarea>
+      </div>
+    </div>
+    <p id="et-err" style="display:none;font-size:12px;color:#DC3545;margin-bottom:10px">Completá todos los campos obligatorios.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-sec" onclick="closeModalEditarTicket()">Cancelar</button>
+      <button class="btn-prim" onclick="saveEditTicket()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== MODAL CIERRE ADMINISTRATIVO (Líder Técnico) ===== -->
+<div id="modal-cierre" class="modal-overlay">
+  <div class="modal-card" style="width:460px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <p style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">🔒 Cerrar ticket administrativamente</p>
+        <p style="font-size:12px;color:#5F6B7A">Esta acción no requiere validación del usuario</p>
+      </div>
+      <button onclick="cerrarModalCierre()" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div style="background:#FFF8E1;border:1px solid #FFD966;border-radius:8px;padding:10px 13px;font-size:12px;color:#856404;margin-bottom:16px">
+      ⚠️ Al confirmar, el ticket quedará cerrado de forma definitiva y el usuario no podrá reabrirlo ni calificar la atención.
+    </div>
+    <div class="form-group" style="margin-bottom:6px">
+      <label style="font-size:13px;font-weight:500;color:#1A2440;margin-bottom:5px;display:block">Justificación del cierre <span class="req">*</span></label>
+      <textarea id="cierre-justificacion" placeholder="Explicá el motivo del cierre administrativo (ej: duplicado, resuelto por otro canal, sin respuesta del usuario)..." style="width:100%;border:1px solid #C0CEDF;border-radius:7px;padding:9px 12px;font-size:13px;font-family:Inter,sans-serif;resize:none;min-height:100px;color:#1A2440;line-height:1.5;box-sizing:border-box" onfocus="this.style.borderColor='#1A4FAD';this.style.boxShadow='0 0 0 2px rgba(26,79,173,0.12)'" onblur="this.style.borderColor='#C0CEDF';this.style.boxShadow='none'"></textarea>
+      <p id="cierre-err" style="display:none;font-size:12px;color:#DC3545;margin-top:4px">La justificación es obligatoria para cerrar el ticket.</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+      <button class="btn-sec" onclick="cerrarModalCierre()">Cancelar</button>
+      <button class="btn-danger" onclick="confirmarCierre()" style="background:#DC3545;color:white;border-color:#DC3545">Confirmar cierre</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL EDITAR USUARIO ===== -->
+<div id="modal-editar-usuario" class="modal-overlay">
+  <div class="modal-card" style="width:460px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <p style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">✏️ Editar usuario</p>
+        <p style="font-size:12px;color:#5F6B7A">Modificá los datos del usuario. Dejá la contraseña en blanco para no cambiarla.</p>
+      </div>
+      <button onclick="cerrarModalEditarUsuario()" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre <span class="req">*</span></label>
+        <input type="text" id="eu-nombre" placeholder="Ej: María">
+      </div>
+      <div class="form-group">
+        <label>Apellido <span class="req">*</span></label>
+        <input type="text" id="eu-apellido" placeholder="Ej: García">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico <span class="req">*</span></label>
+      <input type="text" id="eu-email" placeholder="m.garcia@allpharma.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nueva contraseña <span style="color:#5F6B7A;font-weight:400">(opcional)</span></label>
+        <input type="password" id="eu-pass" placeholder="Dejar en blanco para no cambiar">
+      </div>
+      <div class="form-group">
+        <label>Rol <span class="req">*</span></label>
+        <select id="eu-rol">
+          <option value="usuario">Usuario</option>
+          <option value="tecnico">Técnico IT</option>
+          <option value="lider_tecnico">Líder Técnico</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <p id="eu-err" style="display:none;font-size:12px;color:#DC3545;margin-bottom:10px"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+      <button class="btn-sec" onclick="cerrarModalEditarUsuario()">Cancelar</button>
+      <button class="btn-prim" onclick="guardarEditarUsuario()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL NUEVO USUARIO ===== -->
+<div id="modal-nuevo-usuario" class="modal-overlay">
+  <div class="modal-card" style="width:460px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <p style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">➕ Agregar usuario</p>
+        <p style="font-size:12px;color:#5F6B7A">El usuario podrá ingresar al sistema con las credenciales asignadas</p>
+      </div>
+      <button onclick="cerrarModalNuevoUsuario()" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre <span class="req">*</span></label>
+        <input type="text" id="nu-nombre" placeholder="Ej: María García">
+      </div>
+      <div class="form-group">
+        <label>Apellido <span class="req">*</span></label>
+        <input type="text" id="nu-apellido" placeholder="Ej: López">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico <span class="req">*</span></label>
+      <input type="text" id="nu-email" placeholder="Ej: m.garcia@allpharma.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Contraseña <span class="req">*</span></label>
+        <input type="password" id="nu-pass" placeholder="Contraseña de acceso">
+      </div>
+      <div class="form-group">
+        <label>Rol <span class="req">*</span></label>
+        <select id="nu-rol">
+          <option value="">Seleccioná...</option>
+          <option value="usuario">Usuario</option>
+          <option value="tecnico">Técnico IT</option>
+          <option value="lider_tecnico">Líder Técnico</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+    <p id="nu-err" style="display:none;font-size:12px;color:#DC3545;margin-bottom:10px"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+      <button class="btn-sec" onclick="cerrarModalNuevoUsuario()">Cancelar</button>
+      <button class="btn-prim" onclick="guardarNuevoUsuario()">Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ELIMINAR TICKET ===== -->
+<div id="modal-eliminar-ticket" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="elim-title">
+  <div class="modal-card" style="width:420px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <p id="elim-title" style="font-size:15px;font-weight:600;color:#DC3545;margin-bottom:2px">🗑 Eliminar ticket</p>
+        <p style="font-size:12px;color:#5F6B7A">Esta acción no se puede deshacer</p>
+      </div>
+      <button onclick="cerrarModalEliminarTicket()" aria-label="Cerrar modal" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:10px 13px;font-size:12px;color:#7F1D1D;margin-bottom:16px">
+      ⚠️ El ticket <strong id="elim-ticket-id"></strong> y todo su historial de mensajes serán eliminados permanentemente.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn-sec" onclick="cerrarModalEliminarTicket()">Cancelar</button>
+      <button class="btn-danger" id="elim-confirm-btn" onclick="ejecutarEliminarTicket()" style="background:#DC3545;color:white;border-color:#DC3545">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DESACTIVAR USUARIO ===== -->
+<div id="modal-desactivar-usuario" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="desact-title">
+  <div class="modal-card" style="width:440px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <p id="desact-title" style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px" id="desact-titulo-modal">⚙️ Cambiar estado del usuario</p>
+        <p style="font-size:12px;color:#5F6B7A" id="desact-subtitle">Confirmá la acción antes de continuar</p>
+      </div>
+      <button onclick="cerrarModalDesactivar()" aria-label="Cerrar modal" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div id="desact-warning-box" style="border-radius:8px;padding:10px 13px;font-size:12px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn-sec" onclick="cerrarModalDesactivar()">Cancelar</button>
+      <button id="desact-confirm-btn" onclick="ejecutarToggleActivo()" style="padding:7px 14px;border-radius:7px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;border:none">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL RESETEAR DATOS ===== -->
+<div id="modal-reset-datos" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+  <div class="modal-card" style="width:440px;text-align:left;padding:28px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <p id="reset-title" style="font-size:15px;font-weight:600;color:#DC3545;margin-bottom:2px">⚠️ Resetear datos del sistema</p>
+        <p style="font-size:12px;color:#5F6B7A">Esta acción es irreversible</p>
+      </div>
+      <button onclick="cerrarModalReset()" aria-label="Cerrar modal" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:10px 13px;font-size:12px;color:#7F1D1D;margin-bottom:16px">
+      ⚠️ Se eliminarán <strong>todos los tickets, calificaciones y mensajes</strong> guardados en este navegador y se restaurarán los datos de ejemplo originales. No hay forma de revertir esto.
+    </div>
+    <div class="form-group" style="margin-bottom:6px">
+      <label for="reset-confirmar-texto" style="font-size:13px;font-weight:500;color:#1A2440;margin-bottom:5px;display:block">
+        Escribí <strong>RESETEAR</strong> para confirmar <span class="req">*</span>
+      </label>
+      <input type="text" id="reset-confirmar-texto" placeholder="RESETEAR" autocomplete="off"
+        style="width:100%;border:1px solid #C0CEDF;border-radius:7px;padding:8px 11px;font-size:13px;font-family:'Inter',sans-serif;color:#1A2440;box-sizing:border-box"
+        oninput="onResetTextoInput()"
+        onfocus="this.style.borderColor='#1A4FAD';this.style.boxShadow='0 0 0 2px rgba(26,79,173,0.12)'"
+        onblur="this.style.borderColor='#C0CEDF';this.style.boxShadow='none'">
+      <p id="reset-err" style="display:none;font-size:12px;color:#DC3545;margin-top:4px">Escribí exactamente RESETEAR para continuar.</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+      <button class="btn-sec" onclick="cerrarModalReset()">Cancelar</button>
+      <button id="reset-confirm-btn" disabled onclick="ejecutarReset()" style="background:#DC3545;color:white;border:none;padding:7px 14px;border-radius:7px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;opacity:0.45">Resetear todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PERMISOS INDIVIDUALES POR USUARIO ===== -->
+<div id="modal-permisos-usuario" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="permisos-usuario-title">
+  <div class="modal-card ov-modal-card" style="width:660px;max-width:92vw;text-align:left;padding:22px 26px">
+    <div class="ov-modal-title">
+      <div>
+        <p id="permisos-usuario-title" style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">🔧 Permisos individuales</p>
+        <p style="font-size:12px;color:#5F6B7A">Personalizá permisos para este usuario en particular, por encima de su rol</p>
+      </div>
+      <button onclick="cerrarModalPermisosUsuario()" aria-label="Cerrar modal" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div id="permisos-usuario-body"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL JUSTIFICACIÓN DE DESVIACIÓN DE PERMISO ===== -->
+<div id="modal-justif-permiso" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="justif-title">
+  <div class="modal-card" style="width:460px;max-width:92vw;text-align:left;padding:24px 28px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <p id="justif-title" style="font-size:15px;font-weight:600;color:#0F3580;margin-bottom:2px">📝 Justificá el cambio de permiso</p>
+        <p style="font-size:12px;color:#5F6B7A">Este permiso se aparta del rol del usuario. Para guardarlo, registrá el motivo.</p>
+      </div>
+      <button onclick="cerrarModalJustificacion()" aria-label="Cerrar modal" style="background:none;border:none;font-size:20px;color:#ADB5BD;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>
+    <div id="justif-context" class="justif-ctx"></div>
+    <div class="form-group" style="margin-top:14px">
+      <label>Motivo del cambio <span class="req">*</span></label>
+      <textarea id="justif-motivo" placeholder="Ej: Se le habilita reasignar casos para cubrir guardias del equipo de redes durante junio."></textarea>
+    </div>
+    <p id="justif-err" style="display:none;font-size:12px;color:#DC3545;margin-bottom:10px"></p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn-sec" onclick="cerrarModalJustificacion()">Cancelar</button>
+      <button class="btn-prim" onclick="confirmarJustificacion()">Guardar cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SPINNER LOGIN + AUTOFOCUS ===== -->
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+#btn-ingresar { display: flex; align-items: center; justify-content: center; }
+</style>
+
+<!-- ===== ACCESIBILIDAD: Escape + focus trap en modales ===== -->
+<script>
+(function () {
+  /* Mapa: id overlay → función de cierre definida en app.js */
+  const MODAL_CLOSE = {
+    'modal-rating':            () => { /* obligatorio, no se cierra con Escape */ },
+    'modal-editar-ticket':     () => closeModalEditarTicket(),
+    'modal-cierre':            () => cerrarModalCierre(),
+    'modal-editar-usuario':    () => cerrarModalEditarUsuario(),
+    'modal-nuevo-usuario':     () => cerrarModalNuevoUsuario(),
+    'modal-eliminar-ticket':   () => cerrarModalEliminarTicket(),
+    'modal-desactivar-usuario':() => cerrarModalDesactivar(),
+    'modal-reset-datos':       () => cerrarModalReset(),
+    'modal-permisos-usuario':  () => cerrarModalPermisosUsuario(),
+    'modal-justif-permiso':    () => cerrarModalJustificacion(),
+  };
+
+  const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+  });
+
+  const openStack = [];
+
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      const id = overlay.id;
+      const isOpen = overlay.classList.contains('active') || overlay.classList.contains('show');
+      const inStack = openStack.includes(id);
+      if (isOpen && !inStack) { openStack.push(id); trapFocus(overlay); }
+      else if (!isOpen && inStack) { openStack.splice(openStack.indexOf(id), 1); }
+    });
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  function trapFocus(overlay) {
+    const focusable = () => Array.from(overlay.querySelectorAll(FOCUSABLE))
+      .filter(el => !el.closest('[style*="display:none"]') && !el.closest('[hidden]'));
+    requestAnimationFrame(() => { const els = focusable(); if (els.length) els[0].focus(); });
+    function onKeydown(e) {
+      const isOpen = overlay.classList.contains('active') || overlay.classList.contains('show');
+      if (!isOpen) { overlay.removeEventListener('keydown', onKeydown); return; }
+      if (e.key === 'Tab') {
+        const els = focusable(); if (!els.length) return;
+        const first = els[0], last = els[els.length - 1];
+        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+        else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+      }
+    }
+    overlay.addEventListener('keydown', onKeydown);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !openStack.length) return;
+    const closeFn = MODAL_CLOSE[openStack[openStack.length - 1]];
+    if (closeFn) closeFn();
+  });
+
+  /* ── Spinner en botón Ingresar ── */
+  window._loginSetLoading = function(loading) {
+    const btn = document.getElementById('btn-ingresar');
+    if (!btn) return;
+    if (loading) {
+      btn.disabled = true;
+      btn.dataset.originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="btn-spinner"></span>Verificando...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = btn.dataset.originalText || 'Ingresar';
+    }
+  };
+})();
+</script>
+</body>
+</html>
